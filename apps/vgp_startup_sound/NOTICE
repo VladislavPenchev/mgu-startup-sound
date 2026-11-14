@@ -4,3 +4,4 @@ Full kit license and font notices are included with the installed kit.
 Audio routing was independently implemented using JustAnotherPU/moonride as
 a hardware interoperability reference; no Moonride source code is included.
 No BMW SDK or binary is distributed in this repository.
+yt-dlp zipapp 2026.10.26: see YTDLP_LICENSE and EJS_LICENSE beside this file.

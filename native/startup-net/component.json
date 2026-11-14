@@ -1,0 +1,19 @@
+{
+  "id": "vgp-startup-net",
+  "kind": "tool",
+  "version": "0.1.0",
+  "title": "Startup Sound Network Bridge",
+  "description": "Scoped firewall access for Startup Sound phone import on wlan_bridge",
+  "mguHmi": ["ID7"],
+  "requires": {"mgu-deploy": "0.7.0"},
+  "files": [
+    {"path": "LICENSE", "mode": "0644"},
+    {"path": "vgp-startup-net", "mode": "0755"},
+    {"path": "firewall.js", "mode": "0644"},
+    {"path": "server.js", "mode": "0644"}
+  ],
+  "units": [{"name": "vgp-startup-net.service", "from": "vgp-startup-net.service"}],
+  "enable": [{"unit": "vgp-startup-net.service", "target": "multi-user.target"}],
+  "recmgr": ["vgp-startup-net"],
+  "restart": ["vgp-startup-net.service"]
+}

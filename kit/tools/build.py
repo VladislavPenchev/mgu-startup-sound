@@ -626,7 +626,7 @@ def build(app_id, language='en', preview_only=False):
     # impl.background runs then, without screens
     if spec.get('autostart'):
         pkg['mguAppStartType'] = 'autostart'
-    for key in ('mguHmi', 'requires'):
+    for key in ('mguHmi', 'requires', 'mguInternet'):
         if key in spec:
             pkg[key] = spec[key]
     json.dump(pkg, open(os.path.join(src, 'package.json'), 'w', encoding='utf-8', newline='\n'), indent=2)
@@ -645,7 +645,7 @@ def build(app_id, language='en', preview_only=False):
             continue
         if f.endswith('.js'):
             shutil.copy(os.path.join(adir, f), os.path.join(src, 'javascript', 'app.js' if f == 'main.js' else f))
-        elif f.endswith(('.wasm', '.wad', '.py')) or f in ('LICENSE', 'NOTICE'):
+        elif f.endswith(('.wasm', '.wad', '.py', '.pyz', '.html')) or f in ('LICENSE', 'NOTICE', 'YTDLP_LICENSE', 'EJS_LICENSE'):
             # files the app reads as they are (doom: the game as WebAssembly, its data, its licences)
             shutil.copy(os.path.join(adir, f), os.path.join(src, 'javascript', f))
         elif os.path.isdir(os.path.join(adir, f)):

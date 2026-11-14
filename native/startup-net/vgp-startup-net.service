@@ -1,0 +1,18 @@
+[Unit]
+Description=MGU Startup Sound private Wi-Fi firewall helper
+After=oapcontroller.service
+RequiresMountsFor=/var/opt
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+ExecStart=/var/opt/vgp-startup-net/current/vgp-startup-net
+ExecStopPost=-/usr/bin/node /var/opt/vgp-startup-net/current/firewall.js close
+User=root
+Restart=always
+RestartSec=3
+TimeoutStopSec=20
+NoNewPrivileges=yes
+
+[Install]
+WantedBy=multi-user.target

@@ -1,5 +1,6 @@
 {
   "schema": 1,
+  "tools": [{"id": "vgp-startup-net", "path": "native/startup-net", "title": "Startup Sound phone connection", "mguHmi": ["ID7"], "uninstallable": true}],
   "apps": {
     "path": "apps/*",
     "manifest": "app.json",

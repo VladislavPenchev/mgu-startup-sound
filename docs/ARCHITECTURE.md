@@ -62,6 +62,40 @@ AudioManager cleanup може да не завърши: първата верс�
 достъпът на OAP процеса до ALSA/subprocess и ctypes на конкретния firmware.
 Unit тестовете не доказват тези хардуерни възможности.
 
+## Phone / USB / YouTube (0.2)
+
+`companion.js` слуша на 18887 само след ръчно Phone / USB. Сесията е ограничена
+до 30 минути, с 128-bit токен, проверени Host/Origin и private-network клиенти.
+Няма CORS или произволен файлов endpoint. При потегляне или заспиване сървърът
+се затваря. Автоматичният поздрав е спрян, докато се настройва от телефона.
+
+`native/startup-net` е отделен Store tool, адаптиран от MIT Video Hub Network
+Bridge. Root helper добавя само собствено nft правило за wlan_bridge / 18887,
+докато локалният health endpoint отговаря, и го премахва след затваряне.
+QR се показва само след потвърден ready от loopback status port 18987.
+Не се променят чужди правила и няма публичен root command endpoint.
+
+`library.js` проверява PCM преди атомична подмяна на custom.wav. Има един личен
+слот. USB scan е ограничен до известни mount roots, брой / дълбочина и размер;
+symlinks се пропускат, а realpath се проверява отново преди изпращане.
+
+`youtube.js` стартира pinned official yt-dlp zipapp, само за валидиран HTTPS
+YouTube video ID, без playlist/login/cookies. Избира само M4A audio, максимум
+20 MB / 600 s / 120 s download, с watchdog. Новият оригинален Python адаптер
+чете data/uplink.json и резолвира през DNS от MGU uplink, без промяна на системния
+resolver. CA bundle идва от MGU Python. Node.js 22 е външен Store tool от
+JustAnotherPU/mgu-apps. Няма ffmpeg или транскодиране на мултимедията.
+
+`phone.html` декодира източника в Web Audio на телефона, избира откъс до 10 s,
+рендерира 48 kHz stereo PCM с кратък fade и изпраща WAV. Същият път обслужва
+телефонен файл, USB файл или изтеглен YouTube audio. Файлът е валидиран отново
+на колата. След запазване / затваряне временният YouTube source се премахва.
+Няма външна конвертираща услуга; HTTP е само в доверената локална Wi-Fi мрежа.
+
+Браузърният тест е с Chromium на мобилен viewport, WAV fixture и симулиран
+YouTube backend. Не доказва реален download от колата или Safari codec support.
+Неподдържан формат се отказва; реалният end-to-end тест е в CAR_TEST.md.
+
 ## Източници
 
 - https://github.com/cauliflowermossgrape/idrive7-apps — kit runtime/build,
