@@ -1,0 +1,10 @@
+{
+  "name": "mgu-startup-sound",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "test": "node --test test",
+    "build:preview": "python kit/tools/build.py --preview-only vgp_startup_sound",
+    "build": "python kit/tools/build.py vgp_startup_sound"
+  }
+}

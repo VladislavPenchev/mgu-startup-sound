@@ -1,0 +1,40 @@
+{
+  "id": "vgp_startup_sound",
+  "title": "Startup Sound",
+  "description": "A short sound once per observed ignition session; manual speaker test and background operation. Experimental, ID7 car validation required.",
+  "version": "0.1.0",
+  "vendor": "VladislavPenchev",
+  "license": "MIT",
+  "loggingId": "VSS1",
+  "iconGlyph": "SS",
+  "mguHmi": ["ID7"],
+  "autostart": true,
+  "requires": {"mgu-python": "1.0.3"},
+  "signals": {
+    "de.bmw.infotainment.vehicle.CDS": {"statusEngineSpeed2": "rs"},
+    "de.bmw.infotainment.vehicle.Vehicle2": {"statusCarSpeed2": "rs"},
+    "de.bmw.infrastructure.VehicleCondition": {"VehicleCondition": "s"},
+    "org.genivi.am.commandinterface.CommandControl": {
+      "_instances": "1", "_methods": ["connect", "disconnect", "getListMainConnections", "getListMainSources"]
+    },
+    "org.genivi.am.routinginterface.RoutingControlObserver": {
+      "_instances": "1", "_methods": ["hookSourceAvailablityStatusChange"]
+    }
+  },
+  "config": {
+    "python": "/var/opt/mgu-python/current/bin/python3",
+    "alsaDevice": "plug:smartx:CarLifeMedia_CF_48_STEREO",
+    "sourceId": 287,
+    "sinkId": 1024
+  },
+  "screens": [{
+    "name": "MAIN", "kind": "canvas", "title": "Startup Sound",
+    "buttons": [["BTN_TEST", "Test sound"], ["BTN_STOP", "Stop"], ["BTN_SETTINGS", "Settings"]]
+  }],
+  "settings": [
+    {"key": "enabled", "label": "Automatic startup sound (enable after speaker test)", "type": "bool", "default": false},
+    {"key": "sound", "label": "Sound", "type": "choice", "default": "chime", "options": [["chime", "Welcome chime"], ["soft", "Soft chime"], ["custom", "My WAV file"]]},
+    {"key": "gain", "label": "Clip level (does not change BMW volume)", "type": "choice", "default": "20", "options": [["10", "10%"], ["20", "20%"], ["35", "35%"], ["50", "50%"]]},
+    {"key": "delay", "label": "Delay after engine starts", "type": "choice", "default": "2", "options": [["1", "1 second"], ["2", "2 seconds"], ["4", "4 seconds"], ["6", "6 seconds"]]}
+  ]
+}

@@ -1,0 +1,6 @@
+Startup Sound application: Copyright (c) 2026 Vladislav Penchev. MIT.
+MGU App Kit: Copyright (c) 2026 cauliflowermossgrape and contributors. MIT.
+Full kit license and font notices are included with the installed kit.
+Audio routing was independently implemented using JustAnotherPU/moonride as
+a hardware interoperability reference; no Moonride source code is included.
+No BMW SDK or binary is distributed in this repository.
