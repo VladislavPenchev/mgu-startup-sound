@@ -26,7 +26,8 @@ function probeStartup(port) {
 
 function makeNetwork(options) {
     options = options || {};
-    const firewall = options.firewall || makeFirewall();
+    const bridges = [makeFirewall(), makeFirewall({iface: 'wlan0', tag: 'vgp-startup-hotspot'})];
+    const firewall = options.firewall || {ensure: () => Promise.all(bridges.map(f => f.ensure())), close: () => Promise.all(bridges.map(f => f.close()))};
     const probe = options.probe || probeStartup;
     const intervalMs = options.intervalMs || 2500;
     const statusPort = options.statusPort === undefined ? STATUS_PORT : options.statusPort;

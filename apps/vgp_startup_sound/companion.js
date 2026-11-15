@@ -18,6 +18,9 @@ function privateIp(s) {
 }
 function address() {
     const ips = [];
+    const interfaces = os.networkInterfaces();
+    const uplink = (interfaces.wlan0 || []).find(x => !x.internal && x.family === 'IPv4' && privateIp(x.address));
+    if (uplink) return uplink.address;
     Object.keys(os.networkInterfaces()).forEach((name) => (os.networkInterfaces()[name] || []).forEach((x) => { if (!x.internal && x.family === 'IPv4' && privateIp(x.address)) ips.push(x.address); }));
     return ips.find((x) => x.indexOf('172.16.222.') === 0) || ips[0] || null;
 }
@@ -126,4 +129,4 @@ class Companion {
         return this.reply(res, 404, {error: 'Not found'});
     }
 }
-module.exports = {Companion, privateIp, PORT};
+module.exports = {Companion, privateIp, address, PORT};

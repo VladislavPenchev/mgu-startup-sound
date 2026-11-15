@@ -75,7 +75,7 @@ mgu.run({
             if (state.phone.active()) {
                 const n = state.network(), link = state.phone.link();
                 cv.text('PHONE / USB', 65, 225, 30, t.text);
-                cv.text('1. Connect phone to the car Wi-Fi', 65, 275, 25, t.dim);
+                cv.text('1. Use your hotspot phone or the same Wi-Fi', 65, 275, 25, t.dim);
                 cv.text('2. Scan QR: upload, YouTube or USB', 65, 320, 25, t.dim);
                 cv.text('3. Preview a clip and Save', 65, 365, 25, t.dim);
                 cv.text('Phone session: 30 minutes. Tap Phone / USB to close.', 65, 440, 21, t.dim);

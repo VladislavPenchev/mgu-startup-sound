@@ -19,7 +19,8 @@ function execNft(args) {
 function makeFirewall(options) {
     options = options || {};
     const run = options.run || execNft;
-    const tag = TAG;
+    const tag = options.tag || TAG;
+    const iface = options.iface || IFACE;
     const comment = 'comment "' + tag + '"';
 
     function rules() {
@@ -39,7 +40,7 @@ function makeFirewall(options) {
         const current = await rules();
         const existing = current.tagged.length === 1 ? current.tagged[0] : null;
         const index = existing ? current.rows.indexOf(existing) : -1;
-        const expected = existing && existing.indexOf('iifname "' + IFACE + '"') >= 0 &&
+        const expected = existing && existing.indexOf('iifname "' + iface + '"') >= 0 &&
             existing.indexOf('tcp dport ' + PORT) >= 0 && /\baccept\b/.test(existing);
         // Phone Terminal's separate ACCEPT may precede us. Do not fight for
         // the first slot (its service also periodically restores its rule).
@@ -48,8 +49,8 @@ function makeFirewall(options) {
         if (expected && !blockingBefore) return 'kept';
         await removeTagged(current.tagged);
         await run(['insert', 'rule'].concat(CHAIN, [
-            'iifname', '"' + IFACE + '"', 'tcp', 'dport', String(PORT),
-            'accept', 'comment', '"' + TAG + '"'
+            'iifname', '"' + iface + '"', 'tcp', 'dport', String(PORT),
+            'accept', 'comment', '"' + tag + '"'
         ]));
         return 'added';
     }
@@ -68,7 +69,7 @@ function makeFirewall(options) {
 module.exports = {makeFirewall, TAG, IFACE, PORT};
 
 if (require.main === module && process.argv[2] === 'close') {
-    makeFirewall().close().catch(e => {
+    Promise.all([makeFirewall().close(), makeFirewall({iface: 'wlan0', tag: 'vgp-startup-hotspot'}).close()]).catch(e => {
         console.error('[vgp-startup-net] final firewall cleanup: ' + e.message);
         process.exitCode = 1;
     });

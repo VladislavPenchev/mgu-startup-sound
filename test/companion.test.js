@@ -4,6 +4,15 @@ const assert = require('node:assert/strict');
 const fs = require('fs'), os = require('os'), path = require('path'), http = require('http');
 const {Companion, privateIp} = require('../apps/vgp_startup_sound/companion');
 const {tone} = require('../apps/vgp_startup_sound/wav');
+test('QR prefers private uplink address for the hotspot-hosting phone', () => {
+    const previous = os.networkInterfaces;
+    try {
+        os.networkInterfaces = () => ({wlan_bridge: [{family: 'IPv4', address: '172.16.222.97', internal: false}], wlan0: [{family: 'IPv4', address: '172.20.10.10', internal: false}]});
+        assert.equal(require('../apps/vgp_startup_sound/companion').address(), '172.20.10.10');
+        os.networkInterfaces = () => ({wlan_bridge: [{family: 'IPv4', address: '172.16.222.97', internal: false}]});
+        assert.equal(require('../apps/vgp_startup_sound/companion').address(), '172.16.222.97');
+    } finally { os.networkInterfaces = previous; }
+});
 async function fixture() {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'startup-phone-'));
     const values = {sound: 'chime'}; let allowed = true, busy = false, tests = 0;
