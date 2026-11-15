@@ -56,11 +56,14 @@ class Audio {
             const source = sources.find((x) => x.sourceID === sourceID);
             if (!source || !/CarLifeMedia/i.test(String(source.name || source.sourceName || ''))) throw Error('Expected CarLifeMedia audio source is missing; validate audio configuration');
             const available = source.availability && source.availability.availability;
-            if (available !== 'A_UNAVAILABLE' && available !== 2) throw Error('Audio source is already available or unknown; leaving it untouched');
+            const wasUnavailable = available === 'A_UNAVAILABLE' || available === 2;
+            if (!wasUnavailable && available !== 'A_AVAILABLE' && available !== 1) throw Error('Audio source availability unknown; leaving it untouched');
+            if (wasUnavailable) {
             const a = await call(routing, 'hookSourceAvailablityStatusChange', {sourceID, availability: {availability: 'A_AVAILABLE', availabilityReason: 0}});
             // Some routing observers return void. A successful RPC still owns the availability change.
             if (a && a.amError !== undefined && !ok(a)) throw Error('Audio availability request refused');
             changed = true; ensure();
+            }
             connectedAttempt = true;
             const r = await call(command, 'connect', {sourceID, sinkID});
             if (!ok(r) || r.mainConnectionID === undefined) {

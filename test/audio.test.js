@@ -11,7 +11,7 @@ function fixture(mode) {
         call: async (p, name, args) => {
             calls.push({name, args});
             if (name === 'getListMainConnections') return {listConnections: mode === 'busy' ? [{sourceID: 287, mainConnectionID: 99}] : connected ? [{sourceID: 287, mainConnectionID: 7, connectionState: 'CS_CONNECTED'}] : []};
-            if (name === 'getListMainSources') return {listSources: [{sourceID: 287, name: mode === 'wrong' ? 'OtherSource' : 'CarLifeMedia', availability: {availability: 'A_UNAVAILABLE'}}]};
+            if (name === 'getListMainSources') return {listSources: [{sourceID: 287, name: mode === 'wrong' ? 'OtherSource' : 'CarLifeMedia', availability: {availability: mode === 'available' ? 'A_AVAILABLE' : mode === 'unknown' ? 'A_UNKNOWN' : 'A_UNAVAILABLE'}}]};
             if (name === 'connect') { if (mode === 'refuse') return {amError: 'E_NOT_POSSIBLE'}; connected = true; return {amError: 'E_OK', mainConnectionID: 7}; }
             if (name === 'disconnect') { connected = false; return {amError: 'E_OK'}; }
             return {amError: 'E_OK'};
@@ -30,7 +30,13 @@ test('speaker route is released and availability restored after playback', async
     assert.equal(f.calls.filter((x) => x.name === 'hookSourceAvailablityStatusChange').pop().args.availability.availability, 'A_UNAVAILABLE');
 });
 test('busy or mismatched source is untouched', async () => {
-    for (const mode of ['busy', 'wrong']) { const f = fixture(mode); assert.equal(await f.a.play('chime', 20), false); assert.ok(!f.calls.some((x) => x.name === 'connect' || x.name === 'hookSourceAvailablityStatusChange')); }
+    for (const mode of ['busy', 'wrong', 'unknown']) { const f = fixture(mode); assert.equal(await f.a.play('chime', 20), false); assert.ok(!f.calls.some((x) => x.name === 'connect' || x.name === 'hookSourceAvailablityStatusChange')); }
+});
+
+test('idle available source keeps its original availability', async () => {
+    const f = fixture('available'); assert.equal(await f.a.play('chime', 20), true);
+    assert.ok(!f.calls.some((x) => x.name === 'hookSourceAvailablityStatusChange'));
+    assert.deepEqual(f.calls.filter((x) => x.name === 'disconnect').map((x) => x.args), [{mainConnectionID: 7}]);
 });
 test('player failure still disconnects only its own route', async () => {
     const f = fixture('fail'); assert.equal(await f.a.play('chime', 20), false);
