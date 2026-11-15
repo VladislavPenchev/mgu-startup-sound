@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 'use strict';
-const network = require('./server').makeNetwork();
+const network = require('./server').makeNetwork({audio: new (require('./audio-bridge').AudioBridge)()});
 let exiting = false;
 function shutdown() {
     if (exiting) return;

@@ -106,6 +106,7 @@ class Audio {
         }
     }
     runPlayer(file, seconds, token) {
+        if (this.config.audioBridge) return this.runBridge(file, seconds, token);
         return new Promise((resolve, reject) => {
             let stderr = '', settled = false;
             const child = this.spawn(this.config.python, [path.join(__dirname, 'player.py'), file, this.config.alsaDevice], {stdio: ['ignore', 'ignore', 'pipe']});
@@ -115,6 +116,26 @@ class Audio {
             if (child.stderr) child.stderr.on('data', (b) => { stderr = (stderr + b.toString()).slice(-1200); });
             child.on('error', finish);
             child.on('close', (code) => finish(code === 0 && token === this.token ? null : Error(stderr || 'Playback stopped or timed out')));
+        });
+    }
+    runBridge(file, seconds, token) {
+        return new Promise((resolve, reject) => {
+            const http = require('http');
+            const data = fs.readFileSync(file);
+            const secret = fs.readFileSync(path.join(this.ctx.dataDir, 'audio-bridge-token'), 'utf8');
+            let settled = false;
+            const finish = error => { if (settled) return; settled = true; this.child = null; if (error) reject(error); else resolve(); };
+            const req = http.request({hostname: '127.0.0.1', port: 18987, path: '/audio/play', method: 'POST', headers: {'X-Audio-Token': secret, 'Content-Length': data.length, 'Content-Type': 'audio/wav'}}, res => {
+                let body = ''; res.on('data', b => { body += b; if (body.length > 4096) req.destroy(Error('Invalid audio helper response')); });
+                res.on('end', () => {
+                    try { const result = JSON.parse(body); finish(res.statusCode === 200 && result.ok && token === this.token ? null : Error(result.error || 'Playback cancelled')); }
+                    catch (e) { finish(e); }
+                });
+                res.on('error', finish);
+            });
+            this.child = {kill: () => req.destroy(Error('Playback cancelled'))};
+            req.setTimeout(Math.ceil((seconds + 7) * 1000), () => req.destroy(Error('Audio helper timeout')));
+            req.on('error', finish); req.end(data);
         });
     }
 }

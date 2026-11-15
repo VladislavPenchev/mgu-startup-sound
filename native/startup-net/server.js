@@ -30,6 +30,7 @@ function makeNetwork(options) {
     const probe = options.probe || probeStartup;
     const intervalMs = options.intervalMs || 2500;
     const statusPort = options.statusPort === undefined ? STATUS_PORT : options.statusPort;
+    const audio = options.audio || null;
     let server = null, timer = null, working = null, stopping = false;
     let ready = false, listening = false, error = '', lastRuleCheck = 0;
 
@@ -42,6 +43,7 @@ function makeNetwork(options) {
         if (working || stopping) return working || Promise.resolve();
         working = (async () => {
             try {
+                if (audio) audio.identity();
                 listening = await probe();
                 if (listening) {
                     if (!ready || Date.now() - lastRuleCheck >= 20000) {
@@ -77,6 +79,7 @@ function makeNetwork(options) {
         try { await firewall.close(); }
         catch (e) { error = e.message || String(e); }
         server = http.createServer((req, res) => {
+            if (audio && req.url === '/audio/play') { audio.handle(req, res).catch(() => res.destroy()); return; }
             if (req.method !== 'GET' || req.url !== '/status') {
                 res.writeHead(404, {'Content-Type':'application/json'});
                 return res.end('{"error":"not found"}');
@@ -99,6 +102,7 @@ function makeNetwork(options) {
 
     async function stop() {
         stopping = true;
+        if (audio) audio.stop();
         if (timer) clearInterval(timer);
         timer = null;
         if (working) await working;
