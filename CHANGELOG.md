@@ -1,5 +1,15 @@
 # Changes
 
+## 0.3.1
+
+- Confirmed manual speaker playback from the actual car UI on X5 40i ID7.
+- SmartX requires privileges beyond filesystem access: use a local authenticated helper for bounded PCM playback, not a privileged app.
+- Helper accepts only validated 48 kHz stereo PCM up to ten seconds; fixed player/device, cancellation, timeout and temporary-file cleanup.
+- Preserve an already available idle CarLifeMedia source and disconnect only the connection created for the clip.
+- Verified YouTube audio download on the head unit as the app UID. Unavailable videos still fail without replacing the existing sound.
+- Include the kit license in partial builds; phone pairing diagnostics are private and removed on close.
+- 31 automated tests. Physical ignition, Start/Stop, USB and iPhone playback still require their own validation.
+
 ## 0.2.0
 
 - Temporary QR phone page in Bulgarian, same-network token pairing and scoped Wi-Fi helper.

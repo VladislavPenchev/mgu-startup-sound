@@ -10,7 +10,7 @@
       "args": ["{id}"],
       "sdk": "oap-sdk",
       "output": "dist/{id}@{version}.tgz",
-      "shared": ["kit/runtime", "kit/platform", "kit/localization", "kit/tools", "oap-sdk"]
+      "shared": ["kit/runtime", "kit/platform", "kit/localization", "kit/tools", "kit/LICENSE.upstream", "oap-sdk"]
     }
   }
 }

@@ -2,7 +2,7 @@
   "id": "vgp_startup_sound",
   "title": "Startup Sound",
   "description": "A short sound once per observed ignition session; manual speaker test and background operation. Experimental, ID7 car validation required.",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "mguInternet": true,
   "maxDiskUsage": 67108864,
   "vendor": "VladislavPenchev",
@@ -11,7 +11,7 @@
   "iconGlyph": "SS",
   "mguHmi": ["ID7"],
   "autostart": true,
-  "requires": {"mgu-python": "1.0.3", "vgp-startup-net": "0.2.0", "jap-node22": "22.23.4"},
+  "requires": {"mgu-python": "1.0.3", "vgp-startup-net": "0.2.1", "jap-node22": "22.23.4"},
   "signals": {
     "de.bmw.infotainment.vehicle.CDS": {"statusEngineSpeed2": "rs"},
     "de.bmw.infotainment.vehicle.Vehicle2": {"statusCarSpeed2": "rs"},

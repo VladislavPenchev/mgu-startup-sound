@@ -23,6 +23,8 @@ async function fixture() {
 test('phone upload, select, preview, test and delete operate on a validated clip', async () => {
     const f = await fixture(); try {
         assert.equal((await f.request('/upload', tone(false), {'X-Filename': encodeURIComponent('Моят звук.mp3')})).code, 201);
+        const pairing = JSON.parse(fs.readFileSync(path.join(f.dir, 'phone-pairing.json'), 'utf8'));
+        assert.equal(pairing.token, f.phone.token);
         assert.equal(f.values.sound, 'custom');
         const s = JSON.parse((await f.request('/status')).bytes); assert.equal(s.custom.name, 'Моят звук.mp3');
         assert.equal((await f.request('/sound?id=custom')).bytes.slice(0, 4).toString(), 'RIFF');

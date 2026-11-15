@@ -93,7 +93,7 @@ mgu.run({
             if (message.length > 85) cv.text(message.slice(85, 170), 65, 320, 24, t.dim);
             const rpm = state.session.rpm, speed = state.session.speed;
             cv.text('RPM: ' + (rpm === null ? '--' : Math.round(rpm)) + '     SPEED: ' + (speed === null ? '--' : speed.toFixed(1)) + ' km/h     STATE: ' + (state.session.condition === null ? '--' : state.session.condition), 65, 380, 24, t.dim);
-            cv.text('Upload custom.wav here: ' + ctx.dataDir, 65, 430, 20, t.dim);
+            cv.text('PHONE / USB: import a file, YouTube link or USB clip', 65, 430, 20, t.dim);
             cv.text('One sound per observed ignition cycle. Stop/Start does not rearm it.', 65, 473, 23, t.dim);
             await ctx.ui.image('MAIN_GFX', cv);
         });

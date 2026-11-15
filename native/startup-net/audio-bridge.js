@@ -46,6 +46,7 @@ class AudioBridge {
                 req.on('end', () => resolve(Buffer.concat(chunks))); req.on('error', reject); req.on('aborted', () => reject(Error('Upload cancelled')));
             });
             const clip = wav.inspect(data);
+            req.setTimeout(0); // Playback may last ten seconds; the upload timeout ends here.
             if (res.destroyed) throw Error('Playback cancelled');
             file = '/run/vgp-startup-audio-' + crypto.randomBytes(16).toString('hex') + '.wav';
             fs.writeFileSync(file, wav.encode(clip.data), {flag: 'wx', mode: 0o600});

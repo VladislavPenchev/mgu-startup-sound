@@ -1,7 +1,7 @@
 {
   "id": "vgp-startup-net",
   "kind": "tool",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "title": "Startup Sound Network Bridge",
   "description": "Scoped firewall access for Startup Sound phone import on wlan_bridge",
   "mguHmi": ["ID7"],

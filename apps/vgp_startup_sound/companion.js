@@ -36,6 +36,8 @@ class Companion {
         this.port = deps && deps.port !== undefined ? deps.port : PORT;
         this.host = deps && deps.host || '0.0.0.0';
         this.server = null; this.token = ''; this.expires = 0; this.error = ''; this.sockets = new Set();
+        this.pairingFile = path.join(ctx.dataDir, 'phone-pairing.json');
+        try { fs.unlinkSync(this.pairingFile); } catch (e) { if (e.code !== 'ENOENT') throw e; }
     }
     active() { return !!this.server && Date.now() < this.expires; }
     link() { const ip = address(); return this.active() && ip ? 'http://' + ip + ':' + this.port + '/#' + this.token : null; }
@@ -50,11 +52,13 @@ class Companion {
         try {
             await new Promise((resolve, reject) => { server.once('error', reject); server.listen(this.port, this.host, resolve); });
             this.port = server.address().port; this.error = '';
+            fs.writeFileSync(this.pairingFile, JSON.stringify({port: this.port, token: this.token, expires: this.expires}), {mode: 0o600});
             this.timer = setTimeout(() => this.stop(), TTL); if (this.timer.unref) this.timer.unref();
             return this.link();
         } catch (e) { this.server = null; this.token = ''; this.error = e.message; throw e; }
     }
     async stop() {
+        try { fs.unlinkSync(this.pairingFile); } catch (e) { if (e.code !== 'ENOENT') throw e; }
         clearTimeout(this.timer); this.token = ''; this.expires = 0; this.youtube.cancel();
         const server = this.server; this.server = null;
         if (server) { this.sockets.forEach((x) => x.destroy()); await new Promise((r) => server.close(r)); }
