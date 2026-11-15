@@ -1,5 +1,11 @@
 # Changes
 
+## 0.3.2
+
+- Fix pairing from the iPhone providing the car's hotspot: prefer the car's private wlan0 address in the QR code.
+- While phone mode is open, allow its one port on both the car Wi-Fi bridge and private uplink. Remove both dedicated rules on close.
+- 32 regression tests, including hotspot QR address selection.
+
 ## 0.3.1
 
 - Confirmed manual speaker playback from the actual car UI on X5 40i ID7.
