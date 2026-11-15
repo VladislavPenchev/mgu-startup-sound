@@ -1,5 +1,13 @@
 # Changes
 
+## 0.4.0
+
+- Skip greetings/tests while another source already owns the same speaker sink. Stop an in-progress greeting if music connects.
+- Require the reserved source to start unavailable; never borrow an already available source.
+- Confirm the exact owned connection has disappeared after disconnect before restoring its availability. Leave foreign connections untouched.
+- Recovered the idle source left available during earlier testing; owner reported YouTube Music no longer stuttered without another ignition cycle. Automatic playback temporarily disabled pending the post-update comparison.
+- 32 regression tests, including music starting during a greeting and cleanup after cancellation.
+
 ## 0.3.3
 
 - Allow the numeric tailnet Host header when Tailscale's userspace proxy connects from loopback. Pairing token and exact Origin validation still apply.
