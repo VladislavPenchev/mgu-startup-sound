@@ -85,8 +85,14 @@ class Companion {
         }
         const local = String(req.socket.localAddress).replace(/^::ffff:/, '');
         const expected = local + ':' + this.port;
-        if (req.headers.host !== expected) return this.reply(res, 403, {error: 'Unexpected host'});
-        if (req.headers.origin && req.headers.origin !== 'http://' + expected) return this.reply(res, 403, {error: 'Unexpected origin'});
+        // Tailscale's userspace proxy connects to loopback while retaining the
+        // browser's tailnet Host. Accept that numeric CGNAT address only from loopback.
+        const supplied = String(req.headers.host || '');
+        const match = /^(100)\.(\d+)\.(\d+)\.(\d+):(\d+)$/.exec(supplied);
+        const peer = String(req.socket.remoteAddress).replace(/^::ffff:/, '');
+        const tailnet = (peer === '127.0.0.1' || peer === '::1') && match && Number(match[2]) >= 64 && Number(match[2]) <= 127 && Number(match[3]) <= 255 && Number(match[4]) <= 255 && Number(match[5]) === this.port;
+        if (supplied !== expected && !tailnet) return this.reply(res, 403, {error: 'Unexpected host'});
+        if (req.headers.origin && req.headers.origin !== 'http://' + supplied) return this.reply(res, 403, {error: 'Unexpected origin'});
         if (!this.active()) return this.reply(res, 403, {error: 'Pairing expired; reopen Phone / USB on the car'});
         if (req.method === 'GET' && u.pathname === '/') return this.reply(res, 200, fs.readFileSync(path.join(__dirname, 'phone.html')), 'text/html; charset=utf-8');
         const received = Buffer.from(String(req.headers['x-mgu-token'] || ''));

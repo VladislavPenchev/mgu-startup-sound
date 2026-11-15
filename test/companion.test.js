@@ -58,6 +58,9 @@ test('pairing token, origin, host, expiry and arbitrary paths are checked', asyn
         assert.equal((await f.request('/status', undefined, {'X-MGU-Token': 'wrong'})).code, 403);
         assert.equal((await f.request('/status', undefined, {Origin: 'https://evil.example'})).code, 403);
         assert.equal((await f.request('/status', undefined, {Host: 'evil.example'})).code, 403);
+        assert.equal((await f.request('/status', undefined, {Host: '100.102.9.113:' + f.phone.port, Origin: 'http://100.102.9.113:' + f.phone.port})).code, 200);
+        assert.equal((await f.request('/status', undefined, {Host: '100.102.9.113:' + f.phone.port, 'X-MGU-Token': 'wrong'})).code, 403);
+        assert.equal((await f.request('/status', undefined, {Host: '100.10.9.113:' + f.phone.port})).code, 403);
         assert.equal((await f.request('/usb/audio?id=../../README.md')).code, 400);
         assert.equal((await f.request('/')).code, 200);
         f.phone.expires = Date.now() - 1; assert.equal((await f.request('/status')).code, 403);
