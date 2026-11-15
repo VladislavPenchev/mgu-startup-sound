@@ -1,5 +1,10 @@
 # Changes
 
+## 0.3.3
+
+- Allow the numeric tailnet Host header when Tailscale's userspace proxy connects from loopback. Pairing token and exact Origin validation still apply.
+- The owner's iPhone timed out over the hotspot in both Chrome and Safari; packet capture observed no incoming requests. Local-network access for Chrome was already enabled. Direct hotspot access is not confirmed.
+
 ## 0.3.2
 
 - Fix pairing from the iPhone providing the car's hotspot: prefer the car's private wlan0 address in the QR code.
