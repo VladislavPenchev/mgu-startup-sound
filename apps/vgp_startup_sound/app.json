@@ -2,7 +2,7 @@
   "id": "vgp_startup_sound",
   "title": "Startup Sound",
   "description": "A short sound once per observed ignition session; manual speaker test and background operation. Experimental, ID7 car validation required.",
-  "version": "0.3.3",
+  "version": "0.4.0",
   "mguInternet": true,
   "maxDiskUsage": 67108864,
   "vendor": "VladislavPenchev",

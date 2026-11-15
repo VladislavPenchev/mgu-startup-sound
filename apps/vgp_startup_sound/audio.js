@@ -40,8 +40,10 @@ class Audio {
         this.busy = true;
         const token = ++this.token, c = this.config;
         let command = null, routing = null, id = null, changed = false, connectedAttempt = false;
+        let mediaTimer = null, mediaWatch = false, mediaPending = false, mediaInterrupted = false;
         const sourceID = c.sourceId, sinkID = c.sinkId;
         const call = (p, name, args) => this.ctx.signals.call(p, name, args, 3500);
+        const foreignMedia = list => list.some(x => x.sourceID !== sourceID && x.sinkID === sinkID && x.connectionState !== 'CS_DISCONNECTED' && x.connectionState !== 4);
         const ensure = () => { if (token !== this.token) throw Error('Playback cancelled'); };
         try {
             this.status = 'Preparing audio';
@@ -52,18 +54,17 @@ class Audio {
             routing = await this.proxy(ROUTING); ensure();
             const connections = listOf(await call(command, 'getListMainConnections', {})); ensure();
             if (connections.some((x) => x.sourceID === sourceID)) throw Error('Audio source busy (CarLife / another app); no route changed');
+            if (foreignMedia(connections)) throw Error('Skipped: music is already using the speakers');
             const sources = listOf(await call(command, 'getListMainSources', {})); ensure();
             const source = sources.find((x) => x.sourceID === sourceID);
             if (!source || !/CarLifeMedia/i.test(String(source.name || source.sourceName || ''))) throw Error('Expected CarLifeMedia audio source is missing; validate audio configuration');
             const available = source.availability && source.availability.availability;
             const wasUnavailable = available === 'A_UNAVAILABLE' || available === 2;
-            if (!wasUnavailable && available !== 'A_AVAILABLE' && available !== 1) throw Error('Audio source availability unknown; leaving it untouched');
-            if (wasUnavailable) {
+            if (!wasUnavailable) throw Error('Audio source already available; no route changed');
             const a = await call(routing, 'hookSourceAvailablityStatusChange', {sourceID, availability: {availability: 'A_AVAILABLE', availabilityReason: 0}});
             // Some routing observers return void. A successful RPC still owns the availability change.
             if (a && a.amError !== undefined && !ok(a)) throw Error('Audio availability request refused');
             changed = true; ensure();
-            }
             connectedAttempt = true;
             const r = await call(command, 'connect', {sourceID, sinkID});
             if (!ok(r) || r.mainConnectionID === undefined) {
@@ -80,19 +81,42 @@ class Audio {
                 await sleep(100);
             }
             if (!ready) throw Error('Audio route did not become ready');
+            const beforePlay = listOf(await call(command, 'getListMainConnections', {}));
+            if (foreignMedia(beforePlay)) throw Error('Skipped: music started while preparing audio');
+            mediaWatch = true;
+            mediaTimer = setInterval(async () => {
+                if (!mediaWatch || mediaPending) return;
+                mediaPending = true;
+                try {
+                    const current = listOf(await call(command, 'getListMainConnections', {}));
+                    if (mediaWatch && foreignMedia(current)) { mediaInterrupted = true; this.stop(); }
+                } catch (e) { if (mediaWatch) this.stop(); }
+                finally { mediaPending = false; }
+            }, 250);
             ensure(); this.status = 'Playing';
             await this.runPlayer(clip.file, clip.seconds, token);
             this.status = 'Played successfully';
             return true;
         } catch (e) {
-            this.status = e.message || String(e);
+            this.status = mediaInterrupted ? 'Stopped: music started' : e.message || String(e);
             this.ctx.log.warn('audio: ' + this.status);
             return false;
         } finally {
+            mediaWatch = false; clearInterval(mediaTimer);
             // Disconnect only the connection returned to this invocation. Never sweep other apps' routes.
             let released = !connectedAttempt;
             if (id !== null) {
-                try { const r = await call(command, 'disconnect', {mainConnectionID: id}); released = ok(r); }
+                try {
+                    const r = await call(command, 'disconnect', {mainConnectionID: id});
+                    released = false;
+                    if (ok(r) || r && (r.amError === 'E_NON_EXISTENT' || r.amError === 8)) {
+                        for (let n = 0; n < 15; n++) {
+                            const current = listOf(await call(command, 'getListMainConnections', {}));
+                            if (!current.some(x => x.mainConnectionID === id)) { released = true; break; }
+                            await sleep(100);
+                        }
+                    }
+                }
                 catch (e) { this.ctx.log.warn('audio disconnect: ' + e); }
             }
             if (changed && released) {
